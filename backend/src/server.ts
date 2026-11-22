@@ -1,42 +1,23 @@
 
-import express, { Request, Response } from "express";
-import cors from "cors";
-import helmet from "helmet";
 import dotenv from "dotenv";
+import app from "./app";
+import connectDB from "./config/database";
 
-// Load environment variables
 dotenv.config();
 
-// Initialize Express application
-const app = express();
-
-// Middlewares
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
-
-// Default route
-app.get("/", (req: Request, res: Response) => {
-    res.status(200).json({
-        success: true,
-        message: "Welcome to CritiQuest API",
-        version: "1.0.0"
-    });
-});
-
-// Health check route
-app.get("/api/health", (req: Request, res: Response) => {
-    res.status(200).json({
-        success: true,
-        message: "CritiQuest backend is running",
-        timestamp: new Date().toISOString()
-    });
-});
-
-// Server configuration
 const PORT = process.env.PORT || 3000;
 
-// Start server
-app.listen(PORT, () => {
-    console.log(`CritiQuest API running on http://localhost:${PORT}`);
-});
+const startServer = async (): Promise<void> => {
+    try {
+        await connectDB();
+
+        app.listen(PORT, () => {
+            console.log(`CritiQuest API running on http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error("Unable to start CritiQuest server:", error);
+        process.exit(1);
+    }
+};
+
+startServer();
