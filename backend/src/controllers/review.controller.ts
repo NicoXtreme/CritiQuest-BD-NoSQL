@@ -362,3 +362,78 @@ export const deleteReview = async (
         });
     }
 };
+
+// Get the authenticated user's review count
+export const getMyReviewCount = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const userId = req.userId;
+
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
+            return;
+        }
+
+        const count = await Review.countDocuments({
+            user: userId
+        });
+
+        res.status(200).json({
+            success: true,
+            count
+        });
+    } catch (error) {
+        console.error("Get user review count error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while retrieving review count"
+        });
+    }
+};
+
+
+// Get the authenticated user's recent reviews
+export const getMyReviews = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const userId = req.userId;
+
+        if (!userId) {
+            res.status(401).json({
+                success: false,
+                message: "Authentication required"
+            });
+            return;
+        }
+
+        const reviews = await Review.find({
+            user: userId
+        })
+            .populate("user", "username")
+            .populate("game", "name rawgId backgroundImage")
+            .sort({ createdAt: -1 })
+            .limit(2);
+
+        res.status(200).json({
+            success: true,
+            count: reviews.length,
+            reviews
+        });
+
+    } catch (error) {
+        console.error("Get user reviews error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "An error occurred while retrieving user reviews"
+        });
+    }
+};

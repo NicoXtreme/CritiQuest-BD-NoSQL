@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes";
 import reviewRoutes from "./routes/review.routes";
 import favoriteRoutes from "./routes/favorite.routes";
 import statisticsRoutes from "./routes/statistics.routes";
+import gameRoutes from "./routes/game.routes";
 
 const app = express();
 
@@ -34,6 +35,9 @@ app.get("/api/health", (req: Request, res: Response) => {
 
 // Authentication routes
 app.use("/api/auth", authRoutes);
+
+// Game routes
+app.use("/api/games", gameRoutes);
 
 // Review routes
 app.use("/api/reviews", reviewRoutes);

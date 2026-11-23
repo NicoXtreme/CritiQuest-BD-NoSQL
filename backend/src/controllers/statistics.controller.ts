@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Review from "../models/Review";
 import Game from "../models/Game";
+import User from "../models/User";
 
 // Get the top 10 games ranked by CritiQuest user reviews
 export const getRankings = async (
@@ -197,6 +198,74 @@ export const getGameStatistics = async (
         res.status(500).json({
             success: false,
             message: "Server error while retrieving game statistics"
+        });
+    }
+};
+
+
+// Get general information for the Home page
+export const getHomeData = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    try {
+        const [gameCount, reviewCount, userCount, recentReviews] =
+            await Promise.all([
+                Game.countDocuments(),
+                Review.countDocuments(),
+                User.countDocuments(),
+                Review.find()
+                    .sort({ createdAt: -1 })
+                    .limit(3)
+                    .populate("user", "username")
+                    .populate("game", "name rawgId")
+                    .lean()
+            ]);
+
+        const formattedReviews = recentReviews.map((review) => {
+            const user = review.user as unknown as {
+                username: string;
+            };
+
+            const game = review.game as unknown as {
+                name: string;
+                rawgId: number;
+            };
+
+            const averageScore = (
+                review.ratings.graphics +
+                review.ratings.gameplay +
+                review.ratings.story +
+                review.ratings.sound
+            ) / 4;
+
+            return {
+                _id: review._id,
+                username: user?.username ?? "Usuario",
+                gameName: game?.name ?? "Videojuego",
+                rawgId: game?.rawgId ?? null,
+                ratings: review.ratings,
+                averageScore: Number(averageScore.toFixed(2)),
+                comment: review.comment,
+                createdAt: review.createdAt
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            statistics: {
+                gameCount,
+                reviewCount,
+                userCount
+            },
+            recentReviews: formattedReviews
+        });
+    } catch (error) {
+        console.error("Get home data error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server error while retrieving home data"
         });
     }
 };

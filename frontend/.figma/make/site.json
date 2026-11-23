@@ -1,0 +1,10 @@
+{
+  "description": "Descubre videojuegos, consulta reseñas y puntuaciones de la comunidad, comparte tus opiniones y guarda tus favoritos en una plataforma para jugadores.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
